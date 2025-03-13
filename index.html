@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #3e3e3e, #121212);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        h1 {
+            color: orange;
+            font-size: 40px;
+        }
+        .aqi-value {
+            font-size: 100px;
+            font-weight: bold;
+            color: orange;
+        }
+        .aqi-category {
+            font-size: 28px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .scale {
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(to right, green, yellow, orange, red, purple, brown);
+            margin: 30px 0;
+            position: relative;
+            border-radius: 8px;
+        }
+        .pointer {
+            width: 15px;
+            height: 30px;
+            background: white;
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+        }
+        .emoji {
+            font-size: 80px;
+            margin: 15px;
+        }
+        .clouds {
+            position: absolute;
+            width: 150px;
+            height: 70px;
+            background: white;
+            opacity: 0.2;
+            border-radius: 50px;
+            box-shadow: 30px 15px 0 10px white;
+            animation: moveClouds 12s infinite linear;
+        }
+        .cloud1 { top: 10%; left: -15%; animation-delay: 0s; }
+        .cloud2 { top: 40%; left: -25%; animation-delay: 3s; }
+        .cloud3 { top: 70%; left: -10%; animation-delay: 6s; }
+        @keyframes moveClouds {
+            0% { left: -15%; }
+            100% { left: 120%; }
+        }
+        .input-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .input-container p {
+            flex: 1;
+            min-width: 200px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: orange;
+            color: black;
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clouds cloud1"></div>
+    <div class="clouds cloud2"></div>
+    <div class="clouds cloud3"></div>
+
+    <div class="container">
+        <h1>Live AQI</h1>
+        <div class="aqi-value" id="aqi">---</div>
+        <div class="aqi-category" id="category">Air Quality is ---</div>
+        
+        <div class="emoji" id="emoji">😶</div>
+
+        <div class="scale">
+            <div class="pointer" id="pointer"></div>
+        </div>
+
+        <div class="input-container">
+            <p>PM2.5 (µg/m³): <input type="number" id="pm25"></p>
+            <p>PM10 (µg/m³): <input type="number" id="pm10"></p>
+            <p>CO (mg/m³): <input type="number" id="co"></p>
+            <p>NO₂ (µg/m³): <input type="number" id="no2"></p>
+            <p>SO₂ (µg/m³): <input type="number" id="so2"></p>
+            <p>O₃ (µg/m³): <input type="number" id="o3"></p>
+        </div>
+        
+        <button onclick="predictAQI()">Check AQI</button>
+    </div>
+
+    <script>
+        function predictAQI() {
+            let pm25 = parseFloat(document.getElementById("pm25").value) || 0;
+            let pm10 = parseFloat(document.getElementById("pm10").value) || 0;
+            let co = parseFloat(document.getElementById("co").value) || 0;
+            let no2 = parseFloat(document.getElementById("no2").value) || 0;
+            let so2 = parseFloat(document.getElementById("so2").value) || 0;
+            let o3 = parseFloat(document.getElementById("o3").value) || 0;
+            
+            if (pm25 === 0 && pm10 === 0 && co === 0 && no2 === 0 && so2 === 0 && o3 === 0) {
+                alert("Please enter at least one pollutant value!");
+                return;
+            }
+
+            let aqi = Math.round((pm25 * 0.4) + (pm10 * 0.3) + (co * 15) + (no2 * 0.2) + (so2 * 0.1) + (o3 * 0.2));
+
+            let category = "";
+            let emoji = "😶";
+            let position = (aqi / 500) * 100;
+
+            if (aqi <= 50) {
+                category = "Good 😊";
+                emoji = "😃";
+            } else if (aqi <= 100) {
+                category = "Satisfactory 🙂";
+                emoji = "🙂";
+            } else if (aqi <= 200) {
+                category = "Moderate 😷";
+                emoji = "😷";
+            } else if (aqi <= 300) {
+                category = "Poor 🤧";
+                emoji = "🤧";
+            } else if (aqi <= 400) {
+                category = "Very Poor 🤢";
+                emoji = "🤢";
+            } else {
+                category = "Severe 🤮";
+                emoji = "🤮";
+            }
+
+            document.getElementById("aqi").innerText = aqi;
+            document.getElementById("category").innerText = "Air Quality is " + category;
+            document.getElementById("emoji").innerText = emoji;
+            document.getElementById("pointer").style.left = position + "%";
+        }
+    </script>
+
+</body>
+</html>
